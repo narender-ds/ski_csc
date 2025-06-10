@@ -1,9 +1,9 @@
-import RequirementForm from "@/components/RequirementForm";
+import HomePage from "./home";
 
 export default function Home() {
   return (
     <main className="p-6">
-    <RequirementForm />
-  </main>
+      <HomePage />
+    </main>
   );
 }
