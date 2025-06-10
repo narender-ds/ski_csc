@@ -10,7 +10,6 @@ const RequirementForm = () => {
     description: '',
     services: [],
   });
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -27,18 +26,37 @@ const RequirementForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Send using EmailJS
-    emailjs.send(
-      'service_01c0jkr',
-      'template_lew4k0m',
-      formData,
-      '_VhA_cs3XRDp7-oAd'
-    ).then(() => {
-      alert("Form sent successfully!");
-    }).catch(err => {
-      console.error(err);
-      alert("Failed to send form");
-    });
+    const commonParams = {
+      name: formData.businessName,
+      email: formData.email,
+      phone: formData.phone,
+      description: formData.description,
+      services: formData.services.join(', '),
+      time: new Date().toLocaleString(),
+    };
+
+    try {
+      // Email to Admin (you)
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '',
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '', // Admin template ID
+        commonParams,
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || ''
+      );
+
+      // Thank-you email to user
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID|| '',
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_USER_ID || '', // Thank-you template ID
+        commonParams,
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY|| ''
+      );
+
+      alert("Form submitted successfully!");
+    } catch (err) {
+      console.error("Error sending email:", err);
+      alert("Failed to send form. Please try again.");
+    }
   };
 
   return (
@@ -46,16 +64,16 @@ const RequirementForm = () => {
       <h2 className="text-2xl font-bold mb-4">Website Requirement Form</h2>
 
       <label>Business Name</label>
-      <input type="text" name="businessName" onChange={handleChange} className="border w-full p-2 mb-3" />
+      <input type="text" name="businessName" onChange={handleChange} className="border w-full p-2 mb-3" required />
 
       <label>Email</label>
-      <input type="email" name="email" onChange={handleChange} className="border w-full p-2 mb-3" />
+      <input type="email" name="email" onChange={handleChange} className="border w-full p-2 mb-3" required />
 
       <label>Phone</label>
-      <input type="text" name="phone" onChange={handleChange} className="border w-full p-2 mb-3" />
+      <input type="text" name="phone" onChange={handleChange} className="border w-full p-2 mb-3" required />
 
       <label>Description</label>
-      <textarea name="description" onChange={handleChange} className="border w-full p-2 mb-3"></textarea>
+      <textarea name="description" onChange={handleChange} className="border w-full p-2 mb-3" required></textarea>
 
       <label>Services Needed</label><br />
       {["PAN Card", "Aadhar Update", "Bill Payment", "Insurance"].map(service => (
